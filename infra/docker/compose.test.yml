@@ -1,0 +1,26 @@
+# Isolated local PostgreSQL for SQL/integration tests ONLY.
+# Not Supabase DEV/PROD; does not host Fastify or Vue.
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: "no"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: hbd_test
+      POSTGRES_PASSWORD: ${HBD_PG_TEST_PASSWORD:?Set HBD_PG_TEST_PASSWORD in .env.docker.test}
+    ports:
+      - "127.0.0.1:${HBD_PG_TEST_PORT:-55432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hbd_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    volumes:
+      - hbd_pg_test_data:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+      - ../../supabase/migrations:/workspace/migrations:ro
+      - ../../supabase/tests/database:/workspace/tests:ro
+
+volumes:
+  hbd_pg_test_data:

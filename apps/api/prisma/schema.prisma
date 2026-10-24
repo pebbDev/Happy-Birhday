@@ -1,0 +1,28 @@
+// Prisma model mapping is derivative of canonical Supabase PostgreSQL schema.
+// Physical SQL schema/migration authority: ../../../supabase/migrations/.
+// Do not run Prisma migrations or db push on the canonical production database.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AsyncSessionRecord {
+  id                                  String    @id @default(dbgenerated("gen_random_uuid()")) @map("async_session_id") @db.Uuid
+  state                               String
+  resourceVersion                     BigInt    @default(0) @map("resource_version")
+  currentEditorSessionParticipationId String?   @map("current_editor_session_participation_id") @db.Uuid
+  activeEditingAccessSessionId        String?   @map("active_editing_access_session_id") @db.Uuid
+  createdAt                           DateTime  @default(dbgenerated("transaction_timestamp()")) @map("created_at") @db.Timestamptz(6)
+  inviteReadyAt                       DateTime? @map("invite_ready_at") @db.Timestamptz(6)
+  responseStartDeadlineAt             DateTime? @map("response_start_deadline_at") @db.Timestamptz(6)
+  respondingStartedAt                 DateTime? @map("responding_started_at") @db.Timestamptz(6)
+  respondingDeadlineAt                DateTime? @map("responding_deadline_at") @db.Timestamptz(6)
+  completedAt                         DateTime? @map("completed_at") @db.Timestamptz(6)
+  expiredAt                           DateTime? @map("expired_at") @db.Timestamptz(6)
+
+  @@map("async_session")
+}

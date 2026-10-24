@@ -1,0 +1,63 @@
+openapi: 3.1.0
+info:
+  title: Happy Birthday Platform API
+  version: 0.1.0-foundation
+  description: |
+    Active Fastify foundation endpoints only. Protected business endpoints are NOT
+    implemented in the new backend. The extensive previous contract draft is
+    preserved separately for secure migration.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Local development only
+tags:
+  - name: Health
+paths:
+  /health/live:
+    get:
+      tags: [Health]
+      operationId: getLiveness
+      summary: Process liveness
+      responses:
+        '200':
+          description: Fastify process is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LivenessResponse'
+  /health/ready:
+    get:
+      tags: [Health]
+      operationId: getReadiness
+      summary: Database-dependent readiness
+      description: Returns unavailable if PostgreSQL is not configured or cannot be queried.
+      responses:
+        '200':
+          description: Dependency checked and ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LivenessResponse'
+        '503':
+          description: Dependency not configured or unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnavailableResponse'
+components:
+  schemas:
+    LivenessResponse:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: ok
+    UnavailableResponse:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          const: unavailable

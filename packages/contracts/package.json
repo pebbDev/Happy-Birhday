@@ -1,0 +1,11 @@
+{
+  "name": "@happy-birthday/contracts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Canonical HTTP OpenAPI contract. Generated TypeScript types will be added when consumers exist.",
+  "exports": {
+    "./openapi.yaml": "./openapi/openapi.yaml"
+  },
+  "files": ["openapi"]
+}

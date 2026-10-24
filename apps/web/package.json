@@ -1,0 +1,7 @@
+{
+  "name": "@happy-birthday/web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Reserved workspace for the planned Vue and Vite frontend; no app implementation yet."
+}

@@ -1,0 +1,28 @@
+# Node.js / pnpm local dependency trees and build output
+**/node_modules/
+**/dist/
+**/coverage/
+**/.pnpm-store/
+**/.turbo/
+apps/api/src/generated/prisma/
+
+# Local environment and secrets — permit templates
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+**/.env.keys
+
+# Supabase CLI machine-local state
+supabase/.temp/
+supabase/.branches/
+
+# Local-only project documentation and developer automation (not uploaded yet)
+/docs/
+/scripts/
+
+# Local scratch and OS noise
+.superpowers/
+.temp/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+sharedWorkspaceLockfile: true
+
+# Explicit least-privilege lifecycle script approvals for tools we use.
+# pnpm 12 rejects undeclared dependency build scripts by default.
+allowBuilds:
+  "@prisma/engines": true
+  esbuild: true
+  prisma: true

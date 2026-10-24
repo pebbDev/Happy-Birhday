@@ -1,0 +1,25 @@
+{
+  "name": "happy-birthday-platform",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev:api": "pnpm --filter @happy-birthday/api dev",
+    "start:api": "pnpm --filter @happy-birthday/api start",
+    "typecheck": "pnpm --filter @happy-birthday/api typecheck",
+    "test": "pnpm --filter @happy-birthday/api test",
+    "check": "pnpm run typecheck && pnpm run test",
+    "prisma:generate": "pnpm --filter @happy-birthday/api prisma:generate",
+    "prisma:validate": "pnpm --filter @happy-birthday/api prisma:validate",
+    "db:test:up": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 up",
+    "db:test:down": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 down",
+    "db:test:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 status",
+    "db:test:migrate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 migrate",
+    "db:test:sql": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 test",
+    "db:test:all": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 all",
+    "db:test:dev-api": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 api"
+  }
+}

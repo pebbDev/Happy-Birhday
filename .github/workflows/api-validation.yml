@@ -1,0 +1,45 @@
+name: API validation
+
+on:
+  push:
+    paths:
+      - "apps/api/**"
+      - "packages/contracts/**"
+      - "supabase/migrations/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/api-validation.yml"
+  pull_request:
+    paths:
+      - "apps/api/**"
+      - "packages/contracts/**"
+      - "supabase/migrations/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/api-validation.yml"
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install from frozen workspace lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        run: pnpm run prisma:generate
+      - name: Validate Prisma schema
+        run: pnpm run prisma:validate
+      - name: Check API types and unit tests
+        run: pnpm run check
