@@ -1,30 +1,19 @@
 name: API validation
 
+# Run required jobs on every PR to main, including SQL-only changes.
+# Path-filtered required workflows can leave checks indefinitely pending.
 on:
-  push:
-    paths:
-      - "apps/api/**"
-      - "packages/contracts/**"
-      - "supabase/migrations/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".github/workflows/api-validation.yml"
   pull_request:
-    paths:
-      - "apps/api/**"
-      - "packages/contracts/**"
-      - "supabase/migrations/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".github/workflows/api-validation.yml"
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   api:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -43,3 +32,65 @@ jobs:
         run: pnpm run prisma:validate
       - name: Check API types and unit tests
         run: pnpm run check
+
+  database:
+    name: Database validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate temporary PostgreSQL test password
+        shell: bash
+        run: |
+          echo "HBD_PG_TEST_PASSWORD=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
+      - name: Start isolated PostgreSQL 17
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose -p hbd-ci-db -f infra/docker/compose.test.yml up -d --wait postgres
+
+      - name: Apply canonical SQL migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          migrations=(supabase/migrations/*.sql)
+          if (( ${#migrations[@]} == 0 )); then
+            echo "::error::No canonical SQL migrations found"
+            exit 1
+          fi
+          for migration in "${migrations[@]}"; do
+            filename="${migration##*/}"
+            echo "[MIGRATION] $filename"
+            docker compose -p hbd-ci-db -f infra/docker/compose.test.yml exec -T postgres \
+              psql -U postgres -d hbd_test -X -q -v ON_ERROR_STOP=1 -1 \
+              -f "/workspace/migrations/$filename"
+          done
+          echo "Applied ${#migrations[@]} canonical migrations"
+
+      - name: Run SQL regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          tests=(supabase/tests/database/*.sql)
+          if (( ${#tests[@]} == 0 )); then
+            echo "::error::No SQL regression tests found"
+            exit 1
+          fi
+          for test_file in "${tests[@]}"; do
+            filename="${test_file##*/}"
+            echo "[SQL TEST] $filename"
+            docker compose -p hbd-ci-db -f infra/docker/compose.test.yml exec -T postgres \
+              psql -U postgres -d hbd_test -X -q -v ON_ERROR_STOP=1 \
+              -f "/workspace/tests/$filename"
+          done
+          echo "Passed ${#tests[@]} SQL regression files"
+
+      - name: Remove isolated test database
+        if: always()
+        shell: bash
+        run: |
+          docker compose -p hbd-ci-db -f infra/docker/compose.test.yml down --volumes --remove-orphans
