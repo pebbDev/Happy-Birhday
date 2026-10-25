@@ -37,6 +37,25 @@ Production activation checklist: select Tencent runtime, region, HTTPS ingress, 
 - Project contains records. Do not `db reset --linked`, run an unreviewed `db push`, repair the remote migration ledger, or assume the database is disposable.
 - No Supabase GitHub Branching environments currently exist. Do not create paid preview branches without separately evaluating costs and authorization.
 
+
+## Tencent Cloud inspection and safe DEV rollout preparation (2026-10-25)
+
+- Read-only `tccli sts GetCallerIdentity` succeeded, but the configured **local CLI principal is Tencent root**. **Never put this root credential or configuration file into GitHub Actions**. Root remains local inspection-only; rotate if exposure is suspected.
+- Read-only inventory returned **zero SCF functions, zero CVM instances and zero Lighthouse instances in both `ap-singapore` and `ap-jakarta`**. This does not prove absence in every Tencent region. No server to receive a backend deploy has been identified, and no Tencent infrastructure was created.
+- An existing `tccli-cvm-operator` CAM sub-user exists but its broad managed `*FullAccess` policies are **not approved for CI deployment**. Provision/authorize a dedicated scoped CI/CD identity only after the deployment target/region/resources are determined.
+- The checked-in Fastify API requires Node >=22.12.0. Current Tencent SCF **managed** Node runtimes documented up through Node.js 20.19; using SCF requires a separately designed image/custom runtime, not simply setting Node 24. A Node 24 compatible persistent CVM/Lighthouse (or container) is a **candidate**, not yet accepted.
+- Singapore (`ap-singapore`) is a sensible DEV *candidate* alongside Supabase Singapore, but requires explicit instance selection and network/cost review. Never assume SCF or SSH ingress exists.
+- GitHub Environment `tencent-dev` was provisioned with main-only deployment branch, required reviewers `pebbDev` and `febriyadi`, no self review and no admin bypass; variables `TENCENT_REGION=ap-singapore`, `TENCENT_RUNTIME=UNSELECTED`, `ENABLE_TENCENT_DEV_DEPLOY=false`. **No Tencent credentials have been added to GitHub.**
+- `.github/workflows/tencent-dev-preflight.yml` provides **no-cloud-write** manual Node 24 production artifact build/smoke, SHA-256 digest, and short-lived archived artifact; `ci.yml` additionally compiles and smokes the API on PRs. This is preflight, **not CD deployment**, and requires merging into `main` for manual dispatch.
+- Fastify currently only exposes health endpoints and not the protected business API. Do not expose it through a publicly reachable host as a production backend before required auth, networking, TLS, and runtime configuration are implemented.
+- Keep `ENABLE_TENCENT_DEV_DEPLOY=false`, `ENABLE_TENCENT_CD=false`, and `ENABLE_PRODUCTION_CD=false` until a scoped CAM identity, confirmed host/region, immutable deployment artifact, external HTTPS ingress, `/health/ready` against scoped Supabase DEV connection, rollback and version compatibility checks have all been approved and tested.
+- Next implementation milestone after host provisioning: establish host OS/Node 24/port/service manager, network/egress and TLS, secure runtime `DATABASE_URL` (not in GitHub artifacts), deploy to nonproduction staging with immutable release path and atomic service cutover, verify /health endpoints, and validate rollback without database schema rollback.
+
+Tencent refs:
+- https://intl.cloud.tencent.com/ind/document/product/583/11060 (SCF Node runtimes)
+- https://intl.cloud.tencent.com/ind/document/product/583/40678 (SCF Web Function bootstrap)
+- https://indonesia.tencentcloud.com/document/product/213/10315 (CAM principle of least privilege)
+
 ## References
 Notion 04.7 Infrastructure & Platform: https://app.notion.com/p/3f60c425903481abaac9e486130a5765
 Notion 18.3 IaC & Deployment Authority: https://app.notion.com/p/4000c42590348157acbeff6a1a317cc5

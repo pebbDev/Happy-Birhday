@@ -34,6 +34,20 @@ jobs:
         run: pnpm run prisma:validate
       - name: Check API types and unit tests
         run: pnpm run check
+      - name: Build deployable Node 24 Fastify and smoke without DB secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --filter @happy-birthday/api build
+          node .github/scripts/smoke-api-bundle.mjs apps/api
+      - name: Verify deployable artifact with production-only dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --filter @happy-birthday/api deploy --prod "$RUNNER_TEMP/hbd-api"
+          mkdir -p "$RUNNER_TEMP/hbd-api/dist"
+          cp -a apps/api/dist/. "$RUNNER_TEMP/hbd-api/dist/"
+          node .github/scripts/smoke-api-bundle.mjs "$RUNNER_TEMP/hbd-api"
 
   database:
     name: Database validation

@@ -13,6 +13,7 @@ Adapted from `hammercode-dev/dashboard-yayasan-peduli-ilmu/.github/workflows` wh
 | `create-release.yml` | Push to `main` after version change | Validate changed root version, annotate tag `vX.Y.Z`, publish GitHub Release |
 | `cd.yml` | Successful **Create Release** workflow_run | Opt-in trusted cross-provider CD: Supabase PROD dry-run → Tencent hard gate → Vercel Production promotion (currently blocked) |
 | `supabase-dev-migrations.yml` | Manual `workflow_dispatch` | Supabase DEV ledger/dry-run; optional approved DEV apply |
+| `tencent-dev-preflight.yml` | Manual `workflow_dispatch` on `main` | Compile and smoke Node 24 Fastify, package production dependencies and SHA-256 artifact; **no Tencent API calls or deployment** |
 
 The monorepo version is the root `package.json#version` (starting at `0.1.0`). Individual workspace package versions are **not** published or bumped in this workflow. Conventional Commits are evaluated since the last `v*` tag: `BREAKING CHANGE` / `feat!:` → major, `feat:` → minor, otherwise patch. With no existing tag, the initial calculation considers the repository history.
 
