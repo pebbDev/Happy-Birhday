@@ -1,0 +1,88 @@
+name: CD
+
+# Privileged workflow_run: only build code from a verified main SHA.
+# Disabled until repository variable ENABLE_PRODUCTION_CD=true is set intentionally.
+on:
+  workflow_run:
+    workflows: ["Create Release"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-production-release
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Approved Vercel production release
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      vars.ENABLE_PRODUCTION_CD == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 25
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate release provenance and Vercel target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$VERCEL_ORG_ID" = "team_tUI2OLsX7oc0ppLmXJUz4M0p"
+          test "$VERCEL_PROJECT_ID" = "prj_pKN4O9pgMbsLHdTcLdzVXDX1Zmla"
+          test -n "$VERCEL_TOKEN"
+          version="$(node -p "require('./package.json').version")"
+          git fetch --force --tags origin main
+          test "$(git rev-list -n 1 "v$version")" = "$RELEASE_SHA"
+          test "$(git rev-parse origin/main)" = "$RELEASE_SHA" || {
+            echo "::error::Main advanced since release; refuse stale production deploy"
+            exit 1
+          }
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Validate frontend before deployment
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @happy-birthday/web lint
+          pnpm --filter @happy-birthday/web test
+          pnpm --filter @happy-birthday/web build
+      - name: Install fixed Vercel CLI
+        run: npm install -g vercel@65.1.0
+      - name: Pull production environment
+        working-directory: apps/web
+        run: vercel pull --yes --environment=production
+      - name: Build Vercel artifacts
+        working-directory: apps/web
+        run: vercel build --prod
+      - name: Stage production without domain assignment
+        id: stage
+        working-directory: apps/web
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$(vercel deploy --prebuilt --prod --skip-domain)"
+          [[ "$url" =~ ^https://[a-zA-Z0-9-]+\.vercel\.app$ ]] || exit 1
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+      - name: Promote approved build
+        env:
+          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
+        working-directory: apps/web
+        run: vercel promote "$DEPLOYMENT_URL"

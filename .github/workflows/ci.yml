@@ -1,8 +1,9 @@
-name: API validation
+name: CI
 
-# Run required jobs on every PR to main, including SQL-only changes.
-# Path-filtered required workflows can leave checks indefinitely pending.
+# Unified API, database, web and GitHub workflow validation.
+# Run all jobs on PRs to main; avoid path filters on required checks.
 on:
+  workflow_dispatch:
   pull_request:
     branches: [main]
   push:
@@ -13,6 +14,7 @@ permissions:
 
 jobs:
   api:
+    name: API validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -94,3 +96,44 @@ jobs:
         shell: bash
         run: |
           docker compose -p hbd-ci-db -f infra/docker/compose.test.yml down --volumes --remove-orphans
+
+  web:
+    name: Vue frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install pinned workspace lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck Vue
+        run: pnpm --filter @happy-birthday/web typecheck
+      - name: Lint Vue
+        run: pnpm --filter @happy-birthday/web lint
+      - name: Test Vue
+        run: pnpm --filter @happy-birthday/web test
+      - name: Build and verify SSG + CSR output
+        run: pnpm --filter @happy-birthday/web build
+
+  workflow_lint:
+    name: GitHub workflow validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          cache: false
+      - name: Validate GitHub Actions YAML and expressions
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
