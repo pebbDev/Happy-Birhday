@@ -11,12 +11,70 @@ permissions:
   contents: read
 
 concurrency:
-  group: vercel-production-release
+  group: hbd-production-release
   cancel-in-progress: false
 
 jobs:
+  supabase_production_plan:
+    name: Validate Supabase production migration plan
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      vars.ENABLE_PRODUCTION_CD == 'true' &&
+      vars.ENABLE_SUPABASE_PROD_PLAN == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify trusted main release and isolated production target
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ -n "$SUPABASE_ACCESS_TOKEN" && -n "$SUPABASE_DB_PASSWORD" ]] || exit 1
+          [[ "$SUPABASE_PROJECT_REF" =~ ^[a-z0-9]{20}$ ]] || exit 1
+          version="$(node -p "require('./package.json').version")"
+          git fetch --force --tags origin main
+          test "$(git rev-list -n 1 "v$version")" = "$RELEASE_SHA"
+          test "$(git rev-parse origin/main)" = "$RELEASE_SHA"
+      - uses: supabase/setup-cli@v3.0.1
+        with:
+          version: "2.108.0"
+      - name: Link exact target production project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+      - name: Inspect production migration ledger
+        run: supabase migration list --linked
+      - name: Dry-run canonical migrations (no production DB writes)
+        run: supabase db push --linked --dry-run
+
+  tencent_backend:
+    name: Tencent backend deployment gate (runtime not selected)
+    needs: [supabase_production_plan]
+    if: >-
+      vars.ENABLE_TENCENT_CD == 'true' &&
+      vars.ENABLE_PRODUCTION_CD == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Fail closed until Tencent host and rollout are accepted
+        shell: bash
+        run: |
+          echo "::error::Tencent SCF versus CVM/container, region, ingress and rollback are not yet approved; no backend deploy adapter exists"
+          exit 1
+
   deploy:
     name: Approved Vercel production release
+    needs: [supabase_production_plan, tencent_backend]
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main' &&
