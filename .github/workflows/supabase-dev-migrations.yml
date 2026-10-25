@@ -8,6 +8,11 @@ on:
         required: true
         default: plan
         options: [plan, apply]
+      apply_confirmation:
+        description: 'For apply only, type APPLY-DEV to acknowledge DEV database writes'
+        type: string
+        required: false
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -33,12 +38,19 @@ jobs:
         shell: bash
         env:
           REQUESTED_OPERATION: ${{ inputs.operation }}
+          APPLY_CONFIRMATION: ${{ inputs.apply_confirmation }}
         run: |
           set -euo pipefail
           [[ -n "$SUPABASE_ACCESS_TOKEN" && -n "$SUPABASE_DB_PASSWORD" ]] || { echo "::error::Missing Supabase DEV environment secrets"; exit 1; }
-          [[ "$SUPABASE_PROJECT_REF" =~ ^[a-z0-9]{20}$ ]] || { echo "::error::Invalid Supabase DEV project ref"; exit 1; }
-          if [[ "$REQUESTED_OPERATION" == "apply" && "$ALLOW_DEV_APPLY" != "true" ]]; then
-            echo "::error::DEV apply requires ENABLE_SUPABASE_DEV_APPLY=true"; exit 1
+          # DEV identity verified read-only in Supabase on 2026-10-25.
+          # Never point this workflow at the unrelated 'Day' project or future PROD.
+          if [[ "$SUPABASE_PROJECT_REF" != "daelpglayqvibpsbklwe" ]]; then
+            echo "::error::Wrong DEV target; refusing to link to an unverified Supabase project"; exit 1
+          fi
+          if [[ "$REQUESTED_OPERATION" == "apply" ]]; then
+            if [[ "$ALLOW_DEV_APPLY" != "true" || "$APPLY_CONFIRMATION" != "APPLY-DEV" ]]; then
+              echo "::error::DEV apply requires ENABLE_SUPABASE_DEV_APPLY=true and APPLY-DEV confirmation"; exit 1
+            fi
           fi
       - uses: supabase/setup-cli@v3.0.1
         with:

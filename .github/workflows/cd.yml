@@ -43,6 +43,9 @@ jobs:
           set -euo pipefail
           [[ -n "$SUPABASE_ACCESS_TOKEN" && -n "$SUPABASE_DB_PASSWORD" ]] || exit 1
           [[ "$SUPABASE_PROJECT_REF" =~ ^[a-z0-9]{20}$ ]] || exit 1
+          [[ "$SUPABASE_PROJECT_REF" != "daelpglayqvibpsbklwe" ]] || {
+            echo "::error::Hosted Supabase DEV must never be used as the production migration target"; exit 1
+          }
           version="$(node -p "require('./package.json').version")"
           git fetch --force --tags origin main
           test "$(git rev-list -n 1 "v$version")" = "$RELEASE_SHA"
