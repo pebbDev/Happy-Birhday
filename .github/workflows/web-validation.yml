@@ -1,0 +1,37 @@
+name: Web validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Vue frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install pinned workspace lockfile
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck Vue
+        run: pnpm --filter @happy-birthday/web typecheck
+      - name: Lint Vue
+        run: pnpm --filter @happy-birthday/web lint
+      - name: Test Vue
+        run: pnpm --filter @happy-birthday/web test
+      - name: Build and verify SSG + CSR output
+        run: pnpm --filter @happy-birthday/web build
