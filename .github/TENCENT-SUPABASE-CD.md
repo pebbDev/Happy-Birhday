@@ -1,14 +1,14 @@
 # Tencent / Supabase CD — activation and safety
 
-Status: **Local CD scaffold + read-only provider inspection. No hosted migrations or backend deployment have been executed.**
+**Current DEV status (verified 2026-10-26):** Tencent SCF + Supabase DEV are deployed; signed `/health/live` and `/health/ready` both return HTTP 200, while anonymous requests return 436. See the [DEV operations runbook](../infra/tencent/DEV-RUNBOOK.md). **Automated Tencent DEV CD and Production CD remain disabled.** No hosted migrations were applied as part of this SCF deployment.
 
 ## Accepted boundaries
-- Tencent Fastify runtime remains **UNDECIDED** in Notion Infrastructure 04.7 and IaC & Deployment Authority 18.3: SCF vs CVM/container, region, ingress, health/rollback and deployment credential authority are not yet specified. Do not fabricate an SCF or SSH deployment command.
+- Fastify **DEV runtime is implemented and verified** on SCF Nodejs24.11, region `ap-singapore`, namespace `hbd-dev`. Legacy Notion infrastructure drafts may predate this implementation and require reconciliation; end-user HTTPS ingress, auth, deployment identity, and rollback policy are still pending. Do not extend DEV infrastructure choices automatically to Production.
 - Supabase PostgreSQL canonical schema authority is **supabase/migrations/**. Never apply Prisma Migrate or Prisma db push to this database. Hosted DEV is not Production, and remote SQL migration history must be reconciled before writes.
 - Trusted GitHub Actions remains the single cross-provider release orchestrator: protected release tag → Supabase compatibility/migrations → Tencent API deploy/health → Vercel production promotion. Deployment across clouds is **not atomic**.
 
-## DEV DB pipeline (.github/workflows/supabase-dev-migrations.yml)
-Manual **workflow_dispatch** from the reviewed **main** branch only: choose plan (default, read-only) or apply (requires repository/environment opt-in AND the explicit `APPLY-DEV` confirmation input). The workflow verifies the chosen project is exactly the previously inspected Happy Birthday Diana DEV reference `daelpglayqvibpsbklwe`, before linking. Never re-point this DEV workflow at Production.
+## DEV DB job (`supabase_dev_migrations` in `.github/workflows/cd.yml`)
+Manual **workflow_dispatch** in `cd.yml` from the reviewed **main** branch only: choose plan (default, read-only) or apply (requires repository/environment opt-in AND the explicit `APPLY-DEV` confirmation input). The workflow verifies the chosen project is exactly the previously inspected Happy Birthday Diana DEV reference `daelpglayqvibpsbklwe`, before linking. Never re-point this DEV workflow at Production.
 GitHub Environment **supabase-dev** must be configured with:
 - secrets SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD, for **DEV only**;
 - variable SUPABASE_PROJECT_REF = `daelpglayqvibpsbklwe`, verified hosted **Happy Birthday Diana DEV** project ref (not the local config.toml project_id);
@@ -24,9 +24,9 @@ Current workflow can only inspect Supabase Production migration ledger and run a
 - secrets SUPABASE_ACCESS_TOKEN + SUPABASE_DB_PASSWORD for separate Production project;
 - variable SUPABASE_PROJECT_REF for a separately identified, verified Production project. The workflow explicitly rejects the DEV ref `daelpglayqvibpsbklwe`.
 
-**Production db push/apply deliberately NOT IMPLEMENTED** until Tencent backend adapter and database compatibility/recovery plan are accepted. A Tencent backend job is hard-blocked and exits with a clear error if ENABLE_TENCENT_CD=true; it does not deploy. Existing Vercel Production job needs both Supabase and Tencent gates, so it cannot promote early.
+**Production db push/apply deliberately NOT IMPLEMENTED** until the Production Tencent adapter and database compatibility/recovery plan are accepted. A Tencent backend job is hard-blocked and exits with a clear error if ENABLE_TENCENT_CD=true; it does not deploy. Existing Vercel Production job needs both Supabase and Tencent gates, so it cannot promote early.
 
-Production activation checklist: select Tencent runtime, region, HTTPS ingress, Prisma DB pooling/TLS, COS secret identity, immutable build packaging, health verification, cutover/rollback; validate Supabase migration history in an isolated environment; test forward/rollback compatibility; provision GitHub environments and least privilege tokens; test non-prod pipeline; only then implement the Tencent deployment adapter and DB apply stage.
+Production activation checklist: separately approve Tencent Production target/runtime, HTTPS ingress/auth, scoped IAM, DB TLS/pooling, immutable packaging, health/rollback, and compatibility; validate migration history in an isolated environment before implementing the Production deployment adapter and DB apply stage.
 
 ## Supabase read-only inspection, 2026-10-25
 
@@ -38,23 +38,13 @@ Production activation checklist: select Tencent runtime, region, HTTPS ingress, 
 - No Supabase GitHub Branching environments currently exist. Do not create paid preview branches without separately evaluating costs and authorization.
 
 
-## Tencent Cloud inspection and safe DEV rollout preparation (2026-10-25)
+## Tencent DEV deployment status and CI safety (2026-10-26)
 
-- Read-only `tccli sts GetCallerIdentity` succeeded, but the configured **local CLI principal is Tencent root**. **Never put this root credential or configuration file into GitHub Actions**. Root remains local inspection-only; rotate if exposure is suspected.
-- Read-only inventory returned **zero SCF functions, zero CVM instances and zero Lighthouse instances in both `ap-singapore` and `ap-jakarta`**. This does not prove absence in every Tencent region. No server to receive a backend deploy has been identified, and no Tencent infrastructure was created.
-- An existing `tccli-cvm-operator` CAM sub-user exists but its broad managed `*FullAccess` policies are **not approved for CI deployment**. Provision/authorize a dedicated scoped CI/CD identity only after the deployment target/region/resources are determined.
-- The checked-in Fastify API requires Node >=22.12.0. Current Tencent SCF **managed** Node runtimes documented up through Node.js 20.19; using SCF requires a separately designed image/custom runtime, not simply setting Node 24. A Node 24 compatible persistent CVM/Lighthouse (or container) is a **candidate**, not yet accepted.
-- Singapore (`ap-singapore`) is a sensible DEV *candidate* alongside Supabase Singapore, but requires explicit instance selection and network/cost review. Never assume SCF or SSH ingress exists.
-- GitHub Environment `tencent-dev` was provisioned with main-only deployment branch, required reviewers `pebbDev` and `febriyadi`, no self review and no admin bypass; variables `TENCENT_REGION=ap-singapore`, `TENCENT_RUNTIME=UNSELECTED`, `ENABLE_TENCENT_DEV_DEPLOY=false`. **No Tencent credentials have been added to GitHub.**
-- `.github/workflows/tencent-dev-preflight.yml` provides **no-cloud-write** manual Node 24 production artifact build/smoke, SHA-256 digest, and short-lived archived artifact; `ci.yml` additionally compiles and smokes the API on PRs. This is preflight, **not CD deployment**, and requires merging into `main` for manual dispatch.
-- Fastify currently only exposes health endpoints and not the protected business API. Do not expose it through a publicly reachable host as a production backend before required auth, networking, TLS, and runtime configuration are implemented.
-- Keep `ENABLE_TENCENT_DEV_DEPLOY=false`, `ENABLE_TENCENT_CD=false`, and `ENABLE_PRODUCTION_CD=false` until a scoped CAM identity, confirmed host/region, immutable deployment artifact, external HTTPS ingress, `/health/ready` against scoped Supabase DEV connection, rollback and version compatibility checks have all been approved and tested.
-- Next implementation milestone after host provisioning: establish host OS/Node 24/port/service manager, network/egress and TLS, secure runtime `DATABASE_URL` (not in GitHub artifacts), deploy to nonproduction staging with immutable release path and atomic service cutover, verify /health endpoints, and validate rollback without database schema rollback.
-
-Tencent refs:
-- https://intl.cloud.tencent.com/ind/document/product/583/11060 (SCF Node runtimes)
-- https://intl.cloud.tencent.com/ind/document/product/583/40678 (SCF Web Function bootstrap)
-- https://indonesia.tencentcloud.com/document/product/213/10315 (CAM principle of least privilege)
+- `hbd-api-dev` exists in `ap-singapore/hbd-dev`, Nodejs24.11 HTTP Web Function with CAM-signed HTTPS URL. Supabase DEV transaction pooler and trusted CA are configured in the SCF runtime; authenticated liveness and readiness both return 200 (independently re-checked). Details: [DEV runbook](../infra/tencent/DEV-RUNBOOK.md).
+- `.github/workflows/ci.yml` now includes Tencent DEV artifact preflight: normal PR/push CI verifies the SCF ZIP locally; **manual `workflow_dispatch` on `main`** additionally uploads the validated ZIP and SHA-256 as a GitHub artifact, with no Tencent cloud writes. The former standalone Tencent preflight YAML is consolidated into `ci.yml`. GitHub automatic Tencent deployment remains gated off by `ENABLE_TENCENT_DEV_DEPLOY=false`.
+- Local `cvm-operator` is a broadly privileged IAM principal for operator-controlled DEV diagnostics. **Do not copy its credentials into GitHub Actions**. A dedicated scoped CI/CD deploy identity, role and rollout/rollback design remain pending.
+- Fastify currently exposes only health endpoints. The public-facing Vue frontend must not invoke the CAM-protected operator Function URL or contain Tencent CAM credentials. Product ingress, API auth, HTTPS-only enforcement, bypass prevention, and cost limits require independent design and verification.
+- Supabase `supabase/migrations/` remains the sole canonical hosted schema authority. Production gates remain unchanged.
 
 ## References
 Notion 04.7 Infrastructure & Platform: https://app.notion.com/p/3f60c425903481abaac9e486130a5765

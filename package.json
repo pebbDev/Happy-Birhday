@@ -20,6 +20,7 @@
     "db:test:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 status",
     "db:test:migrate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 migrate",
     "db:test:sql": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 test",
+    "db:test:integration": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 integration",
     "db:test:all": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 all",
     "db:test:dev-api": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 api"
   }

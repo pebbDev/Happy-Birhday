@@ -48,6 +48,24 @@ jobs:
           mkdir -p "$RUNNER_TEMP/hbd-api/dist"
           cp -a apps/api/dist/. "$RUNNER_TEMP/hbd-api/dist/"
           node .github/scripts/smoke-api-bundle.mjs "$RUNNER_TEMP/hbd-api"
+      - name: Validate SCF bootstrap ZIP packaging (offline)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s infra/tencent/tests -p "test_*.py"
+          python3 infra/tencent/tools/package_scf.py --stage "$RUNNER_TEMP/hbd-api" --output "$RUNNER_TEMP/hbd-api-scf.zip"
+          (cd "$RUNNER_TEMP" && sha256sum hbd-api-scf.zip > hbd-api-scf.zip.sha256)
+          (cd "$RUNNER_TEMP" && sha256sum --check hbd-api-scf.zip.sha256)
+      - name: Publish Tencent DEV preflight ZIP and SHA-256 (manual main only)
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tencent-api-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/hbd-api-scf.zip
+            ${{ runner.temp }}/hbd-api-scf.zip.sha256
+          if-no-files-found: error
+          retention-days: 7
 
   database:
     name: Database validation
@@ -104,6 +122,27 @@ jobs:
               -f "/workspace/tests/$filename"
           done
           echo "Passed ${#tests[@]} SQL regression files"
+
+      - name: Configure pnpm for database integration
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.15.0
+          run_install: false
+      - name: Install Node.js for Fastify-Prisma integration
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+      - name: Install dependencies and generate Prisma client
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run prisma:generate
+      - name: Test Fastify readiness and Prisma mapping against isolated PostgreSQL
+        shell: bash
+        run: |
+          set -euo pipefail
+          export HBD_TEST_DATABASE_URL="postgresql://postgres:${HBD_PG_TEST_PASSWORD}@127.0.0.1:55432/hbd_test"
+          pnpm --filter @happy-birthday/api test:integration
 
       - name: Remove isolated test database
         if: always()

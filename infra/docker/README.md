@@ -8,6 +8,7 @@ Fastify remains **native** (`pnpm dev:api`) and Vue remains separate. Docker run
 pnpm run db:test:up
 pnpm run db:test:migrate
 pnpm run db:test:sql
+pnpm run db:test:integration # Fastify + Prisma + migrated PostgreSQL
 # or the combined command:
 pnpm run db:test:all
 pnpm run db:test:status
@@ -15,7 +16,7 @@ pnpm run db:test:dev-api # optional: native Fastify with local test DB URL suppl
 pnpm run db:test:down
 ```
 
-The helper creates `.env.docker.test` with a **random local-only password** if missing, and Docker Compose reads it via `--env-file`. The file is gitignored; only `.env.docker.test.example` is tracked.
+The repository-tracked helper `scripts/db-test.ps1` creates `.env.docker.test` with a **random local-only password** if missing, and Docker Compose reads it via `--env-file`. The file is gitignored; only `.env.docker.test.example` is tracked.
 
 - Compose project: `hbd-pg-test` (separate namespace from Supabase and other stacks)
 - Database: `hbd_test`; user: `postgres`; PostgreSQL: **17** to match the root Supabase config's major version
@@ -23,9 +24,11 @@ The helper creates `.env.docker.test` with a **random local-only password** if m
 - Data: Docker named volume `hbd-pg-test_hbd_pg_test_data`, retained on `down`
 - Roles: minimal test-only `anon`, `authenticated`, `service_role` (not the complete Supabase platform)
 - Migrations: canonical `supabase/migrations/*.sql`, mounted **read-only** and recorded in `hbd_test_meta.applied_migrations`; no `prisma migrate` or `db push`
-- Tests: `supabase/tests/database/*.sql`, executed via `psql -v ON_ERROR_STOP=1`; application integration tests are a separate future step
+- Tests: `supabase/tests/database/*.sql` executed through `psql`, then `apps/api/src/tests/docker-postgres.integration.ts` verifies native Fastify `/health/ready`, Prisma `SELECT 1` and canonical table mappings without writes
 
 **Important:** this is PostgreSQL compatibility testing, **not** full Supabase emulation. Authentication, PostgREST, Supavisor, cloud RLS, and platform-specific behavior still require a Supabase-compatible environment. PostgreSQL migrations may need platform-specific components; if a migration fails, the runner stops without attempting provider changes.
+
+`pnpm run db:test:all` now runs migration + SQL regression + Fastify/Prisma integration. The integration test uses **only** `HBD_TEST_DATABASE_URL` with host `127.0.0.1` and database `hbd_test`; it rejects hosted hosts and does not read the developer's `DATABASE_URL`. In GitHub Actions, the `database` CI job runs the same Node test against its own ephemeral Docker Compose stack. Docker is still not required for Tencent SCF runtime deployment.
 
 To connect Prisma locally for a bounded development session, set a temporary `DATABASE_URL` to `postgresql://postgres:<password-from-local-env>@127.0.0.1:55432/hbd_test?schema=public` in that session only. Never commit a connection string or silently overwrite a hosted database URL.
 
