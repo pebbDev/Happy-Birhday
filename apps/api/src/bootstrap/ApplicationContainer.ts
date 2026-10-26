@@ -20,7 +20,10 @@ export class ApplicationContainer {
 
   constructor(env: Readonly<Record<string, string | undefined>>) {
     if (env.DATABASE_URL?.trim()) {
-      this.database = new PrismaDatabase(env.DATABASE_URL);
+      const trustedCaPem = env.SUPABASE_DB_CA_CERT_BASE64?.trim()
+        ? Buffer.from(env.SUPABASE_DB_CA_CERT_BASE64, "base64").toString("utf8")
+        : undefined;
+      this.database = new PrismaDatabase(env.DATABASE_URL, trustedCaPem);
       this.readinessProbe = new PrismaReadinessProbe(this.database.client);
       this.asyncTogether = new AsyncTogetherModule(this.database);
     } else {

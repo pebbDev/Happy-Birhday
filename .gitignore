@@ -20,9 +20,17 @@ supabase/.branches/
 # Local-only project documentation and developer automation (not uploaded yet)
 /docs/
 /scripts/
+# Track the safe database-test helper; keep other developer scratch scripts ignored.
+!/scripts/
+/scripts/*
+!/scripts/db-test.ps1
 
 # Local scratch and OS noise
 .superpowers/
 .temp/
 .DS_Store
 Thumbs.db
+
+# Local Python helper caches (Tencent DEV scripts)
+**/__pycache__/
+**/*.py[cod]

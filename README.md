@@ -34,7 +34,7 @@ Happy-Birthday-Platform/
 
 - **Cloudflare DNS, proxy, WAF and Workers: deferred.** There is no active Cloudflare zone, Wrangler configuration, Worker runtime, DNS or WAF configuration in this repository. Do not treat historical Cloudflare specifications as live instructions.
 - **Frontend:** Vercel is the planned hosting provider for `apps/web`; the Vue frontend is not implemented yet.
-- **Backend:** Tencent Cloud is the planned host for the Fastify API; public origin, HTTPS ingress, and deployment are not configured here yet.
+- **Backend DEV (verified 2026-10-26):** Tencent SCF `hbd-api-dev` is deployed in `ap-singapore`, with CAM-signed operator HTTPS and Supabase DEV readiness passing. This is **not** the public product ingress; automated Tencent DEV CD and all Production CD are still disabled. See [`infra/tencent/DEV-RUNBOOK.md`](infra/tencent/DEV-RUNBOOK.md).
 - **Database:** Supabase provides PostgreSQL; SQL migrations under `supabase/migrations/` remain authoritative.
 - The superseded Cloudflare DEV Worker ingress plan is preserved for historical reference only under `docs/archive/cloudflare-deferred/`. No Cloudflare setup is required for local development or CI.
 
@@ -46,9 +46,10 @@ Docker runs **only** an isolated PostgreSQL 17 test database (not Fastify or the
 pnpm run db:test:up       # start database
 pnpm run db:test:migrate  # apply canonical Supabase SQL migration files only to test DB
 pnpm run db:test:sql      # run SQL regression files
+pnpm run db:test:integration # Fastify + Prisma test against local Docker PostgreSQL
 pnpm run db:test:dev-api  # run Fastify natively with Docker test DB
 pnpm run db:test:down     # stop; retains test volume
-# Or: pnpm run db:test:all
+# Or: pnpm run db:test:all (migrations + SQL + Fastify/Prisma integration)
 ```
 
 Full instructions and limitations: `infra/docker/README.md`. Database-only PostgreSQL is not a complete local Supabase platform. **Do not** run `prisma db push` or `prisma migrate` for the canonical schema.
@@ -69,9 +70,9 @@ pnpm run dev:api
 
 ## Actual implementation status
 
-This is a structural and dependency-management migration, **not a full business feature migration**. Fastify currently implements only `GET /health/live` and `GET /health/ready`; protected operations remain unavailable. The old Deno/Cloudflare/Edge source was archived outside the Git checkout in the prior cleanup; deployed services have not been altered by this migration.
+This is a structural and dependency-management migration, **not a full business feature migration**. Fastify currently implements only `GET /health/live` and `GET /health/ready`; protected operations remain unavailable. The old Deno/Cloudflare/Edge source was archived outside the Git checkout in the earlier restructuring; subsequent Tencent SCF DEV deployment is documented separately.
 
-`supabase/migrations/` remains the single database-schema migration authority. Prisma is only an ORM mapping. No database migrations, cloud deployments or Git remote changes are performed by this repository restructuring.
+`supabase/migrations/` remains the single database-schema migration authority. Prisma is only an ORM mapping. The earlier repository restructuring did not itself execute migrations or deploy cloud services; Tencent SCF DEV was subsequently deployed and independently health-checked. No hosted migrations or Git remote changes were made by this cleanup.
 
 ## Windows local alias
 
