@@ -1,0 +1,77 @@
+/* Local project font assets; no remote font dependency is added. */
+@font-face {
+  font-family: 'Diana Cormorant';
+  src: url('/fonts/Cormorant_Garamond/CormorantGaramond-VariableFont_wght.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Diana Allura';
+  src: url('/fonts/Allura/Allura-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  /* "Inter" is an existing stack preference, not a bundled font file. */
+  --font-family-body:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-display: 'Diana Cormorant', Georgia, serif;
+  --font-family-handwritten: 'Diana Allura', cursive;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-display: clamp(2.8rem, 8vw, 5.7rem); /* current global h1 */
+
+  --line-height-tight: 1.1;
+  /* Decorative handwritten two-line copy; keep independent of paragraph defaults. */
+  --line-height-handwritten-tight: 1.08;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.7;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  /* Shared decorative typography tokens. */
+  --font-size-ornament-star: clamp(14px, 1.6vw, 23px);
+  --font-size-display-heading: clamp(2.6rem, 3.65vw, 4.2rem);
+  --font-size-display-heading-landscape: clamp(2.5rem, 3.4vw, 4rem);
+  --font-size-display-heading-tablet: clamp(2.9rem, 5.2vw, 4rem);
+  --font-size-display-heading-mobile: clamp(1.7rem, 8.4vw, 3.6rem);
+  --font-size-display-heading-small: 8vw;
+  --font-size-display-figure: clamp(5.7rem, 7.6vw, 8rem);
+  --font-size-display-figure-landscape: clamp(5.4rem, 7vw, 7.5rem);
+  --font-size-display-figure-tablet: clamp(6rem, 8.8vw, 7.7rem);
+  --font-size-display-figure-mobile: clamp(3.4rem, 16vw, 6.4rem);
+  --font-size-display-figure-small: 15.5vw;
+  --font-size-display-subheading: clamp(1.6rem, 2.25vw, 2.8rem);
+  --font-size-display-subheading-tablet: clamp(1.9rem, 3.15vw, 2.5rem);
+  --font-size-display-subheading-mobile: clamp(1.13rem, 5.25vw, 2rem);
+  --font-size-display-subheading-small: 5vw;
+  --font-size-script-caption: clamp(1.15rem, 1.75vw, 2rem);
+  --font-size-script-caption-mobile: clamp(0.87rem, 3.7vw, 1.2rem);
+  --font-size-message-preview: clamp(1.1rem, 1.78vw, 2.1rem);
+  --font-size-message-preview-mobile: clamp(0.8rem, 3.4vw, 1.4rem);
+  --font-size-message-hint: 1.6rem;
+  --font-size-message-body: clamp(1.25rem, 2.5vw, 1.65rem);
+  --font-size-control-close: 2rem;
+  --font-size-decorative-flourish: 1.45rem;
+  --font-size-message-heading: 2.4rem;
+  --font-size-press-control-label: clamp(1.3rem, 1.55vw, 1.65rem);
+  --font-size-press-control-label-mobile: clamp(1.2rem, 5.1vw, 1.55rem);
+  --line-height-display-heading: 0.88;
+  --line-height-display-figure: 0.9;
+  --line-height-message-preview: 0.96;
+  --line-height-message-body: 1.42;
+  --line-height-message-note: 1.4;
+  --line-height-press-control-label: 1.05;
+  --tracking-display-heading: 0.015em;
+}

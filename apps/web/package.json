@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build && node scripts/prerender.mjs && node scripts/verify-rendering.mjs",
+    "build": "pnpm run generate:api-types && vue-tsc -b && vite build && node scripts/prerender.mjs && node scripts/verify-rendering.mjs",
+    "generate:api-types": "openapi-typescript ../../packages/contracts/openapi/openapi.yaml -o src/lib/api/generated/openapi.d.ts",
     "test:rendering": "node scripts/verify-rendering.mjs",
     "preview": "vite preview",
     "typecheck": "vue-tsc -b",
@@ -14,18 +15,26 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@lucide/vue": "^1.61.0",
+    "@vueuse/core": "^15.0.0",
+    "motion-v": "2.8.0",
+    "pinia": "^4.1.0",
     "vue": "^3.5.0",
     "vue-router": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.0.0",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/test-utils": "^2.4.0",
     "eslint": "^9.0.0",
     "eslint-plugin-vue": "^10.0.0",
     "jsdom": "^26.0.0",
-    "typescript": "^6.0.0",
+    "openapi-typescript": "^7.13.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "^8.0.0",
     "vite": "^8.0.0",
     "vitest": "^4.0.0",

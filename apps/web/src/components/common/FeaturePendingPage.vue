@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import UiEyebrow from '@/components/ui/UiEyebrow.vue'
+import UiHint from '@/components/ui/UiHint.vue'
+import UiLink from '@/components/ui/UiLink.vue'
+import UiPageShell from '@/components/ui/UiPageShell.vue'
+import UiPanel from '@/components/ui/UiPanel.vue'
 
 defineProps<{ title: string; explanation: string }>()
 </script>
 
 <template>
-  <main class="page">
-    <div class="panel">
-      <p class="eyebrow">Frontend boilerplate</p>
+  <UiPageShell>
+    <UiPanel>
+      <UiEyebrow>Frontend boilerplate</UiEyebrow>
       <h1>{{ title }}</h1>
       <p>{{ explanation }}</p>
-      <p class="form-hint">Ini hanya shell UI. Data dan akses privat belum dihubungkan ke Fastify.</p>
-      <RouterLink class="link" to="/entry">Kembali ke akses</RouterLink>
-    </div>
-  </main>
+      <slot />
+      <UiHint>Ini hanya shell UI. Data dan akses privat belum dihubungkan ke Fastify.</UiHint>
+      <UiLink to="/entry">Kembali ke akses</UiLink>
+    </UiPanel>
+  </UiPageShell>
 </template>

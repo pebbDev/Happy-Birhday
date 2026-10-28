@@ -17,8 +17,9 @@ apps/api/src/generated/prisma/
 supabase/.temp/
 supabase/.branches/
 
-# Local-only project documentation and developer automation (not uploaded yet)
-/docs/
+# Keep most local project documentation private; allow Superpowers specs/plans in Git.
+/docs/*
+!/docs/superpowers/
 /scripts/
 # Track the safe database-test helper; keep other developer scratch scripts ignored.
 !/scripts/
@@ -34,3 +35,6 @@ Thumbs.db
 # Local Python helper caches (Tencent DEV scripts)
 **/__pycache__/
 **/*.py[cod]
+
+# Local sensitive media reference previews; never ship via public/ or dist/
+apps/web/.local-private/

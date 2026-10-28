@@ -1,0 +1,132 @@
+/* Base palette: illustration swatches sampled from accepted Bobona/Color screenshot.
+   Light/Dark reference the SAME illustration primitives. Confirm exact Figma HEX before release. */
+:root {
+  --color-illustration-purple: #8b53fe;
+  --color-illustration-lime: #8eff01;
+  --color-illustration-pink: #f244ac;
+  --color-illustration-cyan: #55e0f8;
+
+  /* Existing application's DARK semantic surface/text palette; unchanged values. */
+  --color-bg-page: #110f22;
+  --color-bg-surface: #1c1831;
+  --color-bg-surface-raised: #29243e;
+  --color-text-primary: #f9f4fa;
+  --color-text-secondary: #c3bcd1;
+  --color-action-accent: #f7b4cc;
+  --color-action-accent-strong: #ff85b6;
+  --color-border-subtle: rgb(255 255 255 / 16%);
+  /* Shared decorative colors tokens. */
+  --color-canvas-rose: #eeb3c8;
+  --color-text-purple: #75448c;
+  --color-ornament-halo-inner: #fff1c3cc;
+  --color-ornament-halo-middle: #f7cb6980;
+  --color-ornament-star: #fff5be;
+  --color-ornament-star-glow: #f4cc65;
+  --color-text-heading-purple: #76448e;
+  --color-photo-frame-shadow: #31243a5b;
+  --color-photo-frame-shadow-mobile: #36294b6d;
+  --color-photo-frame-script-caption: #74418f;
+  --color-message-focus: #73379b;
+  --color-folded-card-edge: #e8a5ce;
+  --color-folded-card-back-start: #ffc8e3;
+  --color-folded-card-back-end: #d99dd2;
+  --color-paper-sheet: #fff1f9;
+  --color-paper-sheet-shadow: #a15c9252;
+  --color-folded-card-front-start: #ffe0f0;
+  --color-folded-card-front-middle: #efb5db;
+  --color-folded-card-front-end: #d993c9;
+  --color-paper-fold-start: #ffe6f1;
+  --color-paper-fold-end: #e9acd4;
+  --color-message-preview: #7a4a9a;
+  --color-message-preview-glow: #fff5;
+  --color-wax-seal-start: #ffdbc6;
+  --color-wax-seal-middle: #bd747e;
+  --color-wax-seal-end: #8c4f68;
+  --color-wax-seal-foreground: #ffe7c6;
+  --color-wax-seal-ring-inner: #efbda0;
+  --color-wax-seal-ring-outer: #aa6d72;
+  --color-wax-seal-shadow: #73415e77;
+  --color-message-hint: #94559b;
+  --color-modal-paper-border: #d7adbf;
+  --color-modal-paper-surface: #fff6f1;
+  --color-modal-paper-text-purple: #654773;
+  --color-modal-paper-shadow: #381f4877;
+  --color-paper-note-start: #fff9f3;
+  --color-paper-note-end: #fff0f0;
+  --color-paper-note-frame-start: #f5dba4;
+  --color-paper-note-frame-end: #bf8ca7;
+  --color-paper-note-text-purple: #694678;
+  --color-modal-close-surface: #ffffffc9;
+  --color-modal-close-text-purple: #683c7f;
+  --color-decorative-flourish: #c48aab;
+  --color-message-note: #946b85;
+  --color-press-control-text-purple: #764596;
+  --color-press-control-gradient-start: #fff9ff;
+  --color-press-control-gradient-middle: #ffeffc;
+  --color-press-control-gradient-end: #f2c9f6;
+  --color-press-control-arrow: #8f49b2;
+  --color-press-control-focus: #8736a8;
+  --color-press-control-track: #a855f7;
+  --color-press-control-progress: #6d28d9;
+  --color-floral-blossom: #ffd5e7;
+  --color-floral-blossom-edge: #f29ac1;
+  --color-floral-blossom-center: #ffdd86;
+  --color-floral-leaf: #ffd9e6;
+  --color-floral-leaf-edge: #eb93b8;
+  --color-floral-vein: #efb5ce;
+  --color-ornament-glow-initial: #ffe4ac;
+  --color-ornament-glow-bright: #fff3bd;
+  --color-ornament-glow-warm: #ffc56b;
+  --color-folded-card-shadow: rgba(85, 50, 83, 0.32);
+  --color-folded-card-shadow-hover: rgba(85, 50, 83, 0.39);
+  --color-paper-fold-shadow: rgba(109, 57, 100, 0.2);
+  --color-message-backdrop: rgba(26, 14, 45, 0.62);
+  --color-press-control-border: rgba(244, 178, 249, 0.95);
+  --color-press-control-shadow-ring: rgba(252, 206, 252, 0.27);
+  --color-press-control-shadow-halo: rgba(222, 108, 238, 0.35);
+  --color-press-control-shadow-inner: rgba(232, 166, 239, 0.4);
+  --color-press-control-ring-shadow: rgba(109, 40, 217, 0.55);
+  --color-floral-shadow: rgba(144, 59, 100, 0.2);
+  --gradient-ornament-halo: radial-gradient(
+    ellipse,
+    var(--color-ornament-halo-inner),
+    var(--color-ornament-halo-middle) 40%,
+    transparent 72%
+  );
+  --gradient-folded-card-back: linear-gradient(
+    135deg,
+    var(--color-folded-card-back-start),
+    var(--color-folded-card-back-end)
+  );
+  --gradient-folded-card-front: linear-gradient(
+    145deg,
+    var(--color-folded-card-front-start) 4%,
+    var(--color-folded-card-front-middle) 56%,
+    var(--color-folded-card-front-end) 100%
+  );
+  --gradient-folded-card-flap: linear-gradient(
+    160deg,
+    var(--color-paper-fold-start),
+    var(--color-paper-fold-end) 85%
+  );
+  --gradient-wax-seal: radial-gradient(
+    circle at 35% 28%,
+    var(--color-wax-seal-start),
+    var(--color-wax-seal-middle) 65%,
+    var(--color-wax-seal-end)
+  );
+  --gradient-paper-note:
+    linear-gradient(var(--color-paper-note-start), var(--color-paper-note-end)) padding-box,
+    linear-gradient(135deg, var(--color-paper-note-frame-start), var(--color-paper-note-frame-end))
+      border-box;
+  --gradient-press-control: radial-gradient(
+    circle at 40% 28%,
+    var(--color-press-control-gradient-start) 0%,
+    var(--color-press-control-gradient-middle) 48%,
+    var(--color-press-control-gradient-end) 100%
+  );
+
+  /* Existing PIN primary action palette; unchanged. */
+  --gradient-action-primary: linear-gradient(120deg, #f9beda, #ffe3c6);
+  --color-action-primary-foreground: #2a1630;
+}

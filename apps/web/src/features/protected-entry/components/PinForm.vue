@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import UiTextField from '@/components/ui/UiTextField.vue'
+import UiHint from '@/components/ui/UiHint.vue'
 
 const pin = ref('')
 const notice = ref('')
@@ -13,19 +15,17 @@ function submit() {
 
 <template>
   <form @submit.prevent="submit">
-    <label class="form-field">
-      <span>Shared PIN</span>
-      <input
-        v-model="pin"
-        name="pin"
-        type="password"
-        inputmode="numeric"
-        autocomplete="off"
-        required
-        placeholder="Masukkan PIN"
-      />
-    </label>
+    <UiTextField
+      v-model="pin"
+      label="Shared PIN"
+      name="pin"
+      type="password"
+      inputmode="numeric"
+      autocomplete="off"
+      required
+      placeholder="Masukkan PIN"
+    />
     <BaseButton type="submit">Buka Birthday World</BaseButton>
-    <p v-if="notice" role="status" class="form-hint">{{ notice }}</p>
+    <UiHint v-if="notice" role="status">{{ notice }}</UiHint>
   </form>
 </template>
