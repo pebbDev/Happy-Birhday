@@ -8,6 +8,8 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "prepare": "husky",
+    "lint:staged": "lint-staged",
     "dev:api": "pnpm --filter @happy-birthday/api dev",
     "start:api": "pnpm --filter @happy-birthday/api start",
     "typecheck": "pnpm --filter @happy-birthday/api typecheck",
@@ -23,5 +25,10 @@
     "db:test:integration": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 integration",
     "db:test:all": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 all",
     "db:test:dev-api": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/db-test.ps1 api"
+  },
+  "devDependencies": {
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
+    "prettier": "3.9.10"
   }
 }

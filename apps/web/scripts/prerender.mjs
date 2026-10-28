@@ -27,16 +27,33 @@ const server = await createServer({
 
 try {
   const { prerenderInvitation } = await server.ssrLoadModule('/src/entry-server.ts')
-  const invitation = await prerenderInvitation()
-  if (!invitation.includes('A little world')) {
+  const serverHtml = await prerenderInvitation()
+  // Vite's dev SSR emits /src/assets URLs; production files are fingerprinted.
+  // Replace every rendered image source with its unique emitted build asset.
+  const assets = await readdir(resolve(output, 'assets'))
+  const invitation = serverHtml.replace(/src="(\/src\/assets\/[^"]+)"/g, (_, sourcePath) => {
+    const base = sourcePath.split('/').at(-1)
+    const extension = base.slice(base.lastIndexOf('.'))
+    const stem = base.slice(0, -extension.length)
+    const matching = assets.filter(
+      (name) => name.startsWith(stem + '-') && name.endsWith(extension),
+    )
+    if (matching.length !== 1) {
+      throw new Error('Public Invitation asset could not be resolved uniquely: ' + sourcePath)
+    }
+    return 'src="/assets/' + matching[0] + '"'
+  })
+  if (invitation.includes('/src/assets/')) {
+    throw new Error('Unresolved source asset in prerendered Invitation')
+  }
+  if (!invitation.includes('DIANA') || !invitation.includes('data-scene="invitation"')) {
     throw new Error('Invitation prerender produced unexpected or empty HTML')
   }
-  // Load the CSS extracted from the lazy Invitation + shared Button chunks
+  // Load the CSS extracted from the lazy Invitation chunk
   // before JavaScript so the pre-rendered experience is not unstyled.
-  const assets = await readdir(resolve(output, 'assets'))
   const publicCriticalCss = assets
-    .filter(name => /^(?:InvitationPage|BaseButton)-[\w-]+\.css$/.test(name))
-    .map(name => `<link rel="stylesheet" href="/assets/${name}">`)
+    .filter((name) => /^InvitationPage-[\w-]+\.css$/.test(name))
+    .map((name) => `<link rel="stylesheet" href="/assets/${name}">`)
     .join('\n')
   const prerendered = template
     .replace('</head>', `${publicCriticalCss}\n</head>`)

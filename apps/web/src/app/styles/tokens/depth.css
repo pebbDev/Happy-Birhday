@@ -1,0 +1,43 @@
+/* Semantic z-index levels are local to their stacking context (isolation: isolate).
+   Native <dialog>.showModal() enters the browser top layer; z-index does NOT outrank it. */
+:root {
+  --z-scene-background: 0;
+  --z-scene-decor: 10;
+  --z-scene-content: 20;
+  --z-scene-objects: 30;
+  --z-scene-foreground: 40;
+  --z-popover: 50;
+  --z-toast: 60;
+
+  /* Proposed elevation aliases; use only when a scene/component needs them. */
+  --shadow-soft: 0 4px 14px rgb(17 15 34 / 12%);
+  --shadow-floating: 0 14px 30px rgb(17 15 34 / 24%);
+  --shadow-modal: 0 24px 64px rgb(17 15 34 / 40%);
+  /* Shared decorative depth tokens. */
+  --shadow-ornament-star: 0 0 9px var(--color-ornament-star-glow);
+  --shadow-photo-frame: 0 13px 12px var(--color-photo-frame-shadow);
+  --shadow-photo-frame-mobile: 0 10px 12px var(--color-photo-frame-shadow-mobile);
+  --shadow-folded-card: 0 16px 14px var(--color-folded-card-shadow);
+  --shadow-folded-card-hover: 0 19px 20px var(--color-folded-card-shadow-hover);
+  --shadow-paper-sheet: 0 1px 6px var(--color-paper-sheet-shadow);
+  --shadow-paper-fold: 0 2px 2px var(--color-paper-fold-shadow);
+  --shadow-message-preview: 0 1px 1px var(--color-message-preview-glow);
+  --shadow-wax-seal:
+    inset 0 0 0 3px var(--color-wax-seal-ring-inner),
+    inset 0 0 0 5px var(--color-wax-seal-ring-outer), 0 3px 5px var(--color-wax-seal-shadow);
+  --shadow-modal-paper: 0 30px 70px var(--color-modal-paper-shadow);
+  --shadow-press-control:
+    0 0 0 7px var(--color-press-control-shadow-ring),
+    0 0 23px 12px var(--color-press-control-shadow-halo),
+    inset 0 0 11px var(--color-press-control-shadow-inner);
+  --shadow-press-control-ring: 0 0 4px var(--color-press-control-ring-shadow);
+  --shadow-floral: 0 2px 4px var(--color-floral-shadow);
+  --shadow-ornament-glow-base: 0 0 3px var(--color-ornament-glow-initial);
+  --shadow-ornament-glow-bright: 0 0 11px var(--color-ornament-glow-bright);
+  --shadow-ornament-glow-warm: 0 0 5px var(--color-ornament-glow-warm);
+  --blur-ornament-halo: 9px;
+  --blur-dialog-backdrop: 5px;
+
+  /* Existing PIN primary action elevation; unchanged. */
+  --shadow-action-primary: 0 8px 30px rgba(228, 136, 180, 0.18);
+}

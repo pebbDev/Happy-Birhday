@@ -1,0 +1,25 @@
+/* Shared design motion tokens. Animations are implemented with Motion for Vue. */
+:root {
+  --motion-duration-instant: 0ms;
+  --motion-duration-fast: 120ms;
+  --motion-duration-standard: 280ms; /* existing envelope timing */
+  --motion-duration-emphasized: 360ms; /* existing dialog reveal ~350ms */
+  --motion-duration-slow: 600ms;
+  --motion-duration-ambient: 6000ms;
+
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --motion-ease-gentle: ease-in-out;
+}
+
+/* Respect OS reduced-motion preference globally. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 0ms;
+    --motion-duration-standard: 0ms;
+    --motion-duration-emphasized: 0ms;
+    --motion-duration-slow: 0ms;
+    --motion-duration-ambient: 0ms;
+  }
+}

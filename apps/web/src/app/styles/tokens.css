@@ -1,13 +1,31 @@
+/* Canonical visual foundation. Component styling consumes semantic tokens only. */
+@import './tokens/colors.css';
+@import './tokens/spacing.css';
+@import './tokens/typography.css';
+@import './tokens/depth.css';
+@import './tokens/motion.css';
+
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-family-body);
   color-scheme: dark;
-  --page: #110f22;
-  --surface: #1c1831;
-  --surface-2: #29243e;
-  --text: #f9f4fa;
-  --muted: #c3bcd1;
-  --accent: #f7b4cc;
-  --accent-strong: #ff85b6;
-  --border: rgba(255, 255, 255, 0.16);
-  --radius: 1.2rem;
+}
+
+/* Tailwind v4 bridge resolves every utility to its runtime design variable. */
+@theme inline {
+  --color-ui-page: var(--color-bg-page);
+  --color-ui-surface: var(--color-bg-surface);
+  --color-ui-surface-raised: var(--color-bg-surface-raised);
+  --color-ui-text: var(--color-text-primary);
+  --color-ui-muted: var(--color-text-secondary);
+  --color-ui-accent: var(--color-action-accent);
+  --color-ui-accent-strong: var(--color-action-accent-strong);
+  --color-ui-primary-foreground: var(--color-action-primary-foreground);
+  --color-ui-border: var(--color-border-subtle);
+  --font-ui-body: var(--font-family-body);
+  --font-ui-display: var(--font-family-display);
+  --font-ui-handwritten: var(--font-family-handwritten);
+  --radius-ui-panel: var(--radius-panel);
+  --shadow-ui-floating: var(--shadow-floating);
+  --shadow-ui-modal: var(--shadow-modal);
+  --shadow-ui-primary: var(--shadow-action-primary);
 }

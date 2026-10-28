@@ -1,0 +1,3 @@
+{
+  "*.{js,cjs,mjs,ts,tsx,vue,css,scss,html,json,jsonc,md,mdx,yaml,yml,graphql}": "pnpm exec prettier --write"
+}
